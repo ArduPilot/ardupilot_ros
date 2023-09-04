@@ -6,6 +6,7 @@
   <description>The ardupilot ROS 2 use cases package</description>
   <maintainer email="pedrofuoco6@gmail.com">Pedro Fuoco</maintainer>
   <license>GPLv3+</license>
+  <exec_depend>cartographer_ros</exec_depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>

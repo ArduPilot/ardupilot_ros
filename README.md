@@ -1,45 +1,67 @@
 # ardupilot_ros: ROS 2 use cases with Ardupilot
 
-## Requirements :
+## Requirements
+
+### System Requirements
+
 * [ROS Humble](https://docs.ros.org/en/humble/Installation.html)
 
 * [Gazebo Garden](https://gazebosim.org/docs/garden/install)
 
+* [Cartographer ROS](https://google-cartographer-ros.readthedocs.io/en/latest/)
+   * Recommended: Install Google Cartographer with rosdep
+
+### Workspace Requirements
+
 * [ardupilot_gz](https://github.com/ArduPilot/ardupilot_gz)
-    * Here are two workarounds for know issues in the installation of `ardupilot_gz` (they should be fixed soon)
-        * [Handle microxrceddsgen dependency](https://github.com/ArduPilot/ardupilot_gz/issues/19)
-        * Set the ENABLE_DDS ardupilot parameter manually if it isn't set
+
+* [cartographer_ros]()
 
 ## Installation
 
-Clone this repository into your ros2 workspace alongside ardupilot_gz
+Clone this repository into your ros2 workspace alongside ardupilot_gz:
 ```bash
 cd ~/ros2_ws/src
-git clone git@github.com:ardupilot/ardupilot_ros.git -b humble
+git clone git@github.com:ardupilot/ardupilot_ros.git
 ```
-Build it with colcon build
+
+Install dependencies using rosdep:
 ```bash
 cd ~/ros2_ws
-source install/setup.sh
-colcon build --packages-select ardupilot_ros
+rosdep install --from-paths src --ignore-src -r
+```
+
+## Build
+
+Build it with colcon build:
+```bash
+cd ~/ros2_ws
+source /opt/ros/humble/setup.bash
+colcon build --packages-up-to ardupilot_ros ardupilot_gz_bringup
+
 ```
 
 ## Usage
 
-### 1. Cartographer running with lidar on copter
+### 1. Cartographer running with LiDAR on copter
 
-This simulation has an iris copter equipped with a 360 degrees 2D lidar in a maze world, to launch it run:
+This simulation has an Iris copter equipped with a 360 degrees 2D LiDAR in a maze world.
+To launch rviz and gazebo, run:
 
 ```bash
+cd ~/ros2_ws
+source install/setup.sh
 ros2 launch ardupilot_gz_bringup iris_maze.launch.py
 ```
-With the world and copter in place, launch cartographer to generate SLAM:
+In another terminal, with the world and copter in place, launch cartographer to generate SLAM:
 
 ```bash
+cd ~/ros2_ws
+source install/setup.sh
 ros2 launch ardupilot_ros cartographer.launch.py
 ```
 
-If you'd like to get the information from Cartographer to go into Ardupilot's extended kalman filter, you will need to change some parameters, you can do that through any GCS, including mavproxy:
+If you'd like to get the information from Cartographer to go into Ardupilot's extended kalman filter, you will need to change some parameters. You can do that through any GCS, including mavproxy:
 
 -  AHRS_EKF_TYPE = 3 to use EKF3
 -  EK2_ENABLE = 0 to disable EKF2
