@@ -1,3 +1,5 @@
+import os
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
@@ -26,6 +28,10 @@ def generate_launch_description():
             "cartographer.lua",
         ],
         output="screen",
+        remappings = [
+            ("/imu", "/imu"),
+            ("/odom", "/odometry"),
+        ]
     )
 
     cartographer_occupancy_grid_node = Node(
@@ -36,6 +42,19 @@ def generate_launch_description():
             {"resolution": 0.05},
         ],
     )
+
+    # Robot description.
+
+    # Ensure `SDF_PATH` is populated as `sdformat_urdf`` uses this rather
+    # than `GZ_SIM_RESOURCE_PATH` to locate resources.
+    if "GZ_SIM_RESOURCE_PATH" in os.environ:
+        gz_sim_resource_path = os.environ["GZ_SIM_RESOURCE_PATH"]
+
+        if "SDF_PATH" in os.environ:
+            sdf_path = os.environ["SDF_PATH"]
+            os.environ["SDF_PATH"] = sdf_path + ":" + gz_sim_resource_path
+        else:
+            os.environ["SDF_PATH"] = gz_sim_resource_path
 
     # RViz.
     rviz = Node(
