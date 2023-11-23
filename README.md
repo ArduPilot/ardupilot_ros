@@ -1,5 +1,7 @@
 # ardupilot_ros: ROS 2 use cases with Ardupilot
 
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+
 ## Requirements
 
 ### System Requirements
@@ -77,3 +79,12 @@ If you'd like to get the information from Cartographer to go into Ardupilot's ex
 The parameters above are recommended for SITL. If you plan on using this on a real copter, it is a good idea to setup a second source of EKF. This way the robot doesn't crash if the external odometry you are providing stops publishing or gets lost.
 
 Please refer to this link for more information on [Common EKF Sources](https://ardupilot.org/copter/docs/common-ekf-sources.html>) as well as this guide on [GPS / Non-GPS Transitions](https://ardupilot.org/copter/docs/common-non-gps-to-gps.html).
+
+## Contribution Guideline
+
+* Ensure the [pre-commit](https://github.com/pre-commit/pre-commit) hooks pass locally before creating your pull request by installing the hooks before committing.
+   ```bash
+   pre-commit install
+   git commit
+   ```
+* See the [ArduPilot Contributing Guide](https://github.com/ArduPilot/ardupilot/blob/master/.github/CONTRIBUTING.md)
