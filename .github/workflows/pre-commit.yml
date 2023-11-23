@@ -1,0 +1,34 @@
+---
+name: pre-commit
+
+on: [push]
+
+concurrency:
+  group: ci-${{github.workflow}}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu:22.04
+    strategy:
+      fail-fast: false  # don't cancel if a job from the matrix fails
+    # steps:
+    #   # git checkout the PR
+    #   - uses: actions/checkout@v4
+    #     with:
+    #       submodules: 'recursive'
+    #   - name: Install pre-commit tool
+    #     run: |
+    #       apk update
+    #       apk add python3 py3-pip --no-cache
+    #       python3 -m pip install pre-commit
+    #   - name: Install pre-commit in repo
+    #     run: |
+    #       pre-commit install
+    #   - name: Run pre-commit
+    #     run: |
+    #       pre-commit run --all-files --verbose --show-diff-on-failure
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v3
+      - uses: pre-commit/action@v3.0.0
