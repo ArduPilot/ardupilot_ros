@@ -6,6 +6,7 @@
   <description>The ardupilot ROS 2 use cases package</description>
   <maintainer email="pedrofuoco6@gmail.com">Pedro Fuoco</maintainer>
   <license>GPLv3+</license>
+  <exec_depend>pynput</exec_depend>
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>ardupilot_gz_description</exec_depend>
   <exec_depend>ardupilot_gz_gazebo</exec_depend>

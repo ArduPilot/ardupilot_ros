@@ -32,6 +32,6 @@ setup(
     license="GPLv3+",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": [],
+        "console_scripts": ["joy_controller=ardupilot_ros.joy_controller:main"],
     },
 )

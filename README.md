@@ -52,14 +52,14 @@ To launch rviz and gazebo, run:
 
 ```bash
 cd ~/ros2_ws
-source install/setup.sh
+source install/setup.bash
 ros2 launch ardupilot_gz_bringup iris_maze.launch.py
 ```
 In another terminal, with the world and copter in place, launch cartographer to generate SLAM:
 
 ```bash
 cd ~/ros2_ws
-source install/setup.sh
+source install/setup.bash
 ros2 launch ardupilot_ros cartographer.launch.py
 ```
 
@@ -79,6 +79,22 @@ If you'd like to get the information from Cartographer to go into Ardupilot's ex
 The parameters above are recommended for SITL. If you plan on using this on a real copter, it is a good idea to setup a second source of EKF. This way the robot doesn't crash if the external odometry you are providing stops publishing or gets lost.
 
 Please refer to this link for more information on [Common EKF Sources](https://ardupilot.org/copter/docs/common-ekf-sources.html>) as well as this guide on [GPS / Non-GPS Transitions](https://ardupilot.org/copter/docs/common-non-gps-to-gps.html).
+
+### 2. Joystick Controller
+
+The joystick controller allows you to control ArduPilot through a ROS joy topic.
+
+```bash
+cd ~/ros2_ws
+source install/setup.bash
+ros2 run ardupilot_ros joy_controller
+```
+
+Then run the controller using,
+
+`ros2 run ardupilot_ros joy_controller`
+
+Now, using the keyboard keys you can control the drone.
 
 ## Contribution Guideline
 
