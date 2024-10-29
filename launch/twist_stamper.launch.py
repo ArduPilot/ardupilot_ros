@@ -1,5 +1,3 @@
-import os
-
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from pathlib import Path
