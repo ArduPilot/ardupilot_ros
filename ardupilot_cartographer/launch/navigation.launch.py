@@ -31,8 +31,8 @@ def generate_launch_description():
                 ),
                 launch_arguments={
                     "use_sim_time": "true",
-                    "params_file": FindPackageShare("ardupilot_ros").find(
-                        "ardupilot_ros"
+                    "params_file": FindPackageShare("ardupilot_cartographer").find(
+                        "ardupilot_cartographer"
                     )
                     + "/config"
                     + "/navigation.yaml",
@@ -76,7 +76,9 @@ def generate_launch_description():
             "-d",
             str(
                 Path(
-                    FindPackageShare("ardupilot_ros").find("ardupilot_ros"),
+                    FindPackageShare("ardupilot_cartographer").find(
+                        "ardupilot_cartographer"
+                    ),
                     "rviz",
                     "navigation.rviz",
                 )
