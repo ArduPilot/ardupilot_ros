@@ -3,12 +3,17 @@ from launch.actions import IncludeLaunchDescription, GroupAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from pathlib import Path
 
 """Generate a launch description for the navigation example."""
 
 
 def generate_launch_description():
+    # ***** Launch arguments *****
+    use_sim_time_arg = DeclareLaunchArgument("use_sim_time", default_value="true")
+
     # Navigation
     navigation = GroupAction(
         actions=[
@@ -25,7 +30,7 @@ def generate_launch_description():
                     )
                 ),
                 launch_arguments={
-                    "use_sim_time": "true",
+                    "use_sim_time": LaunchConfiguration("use_sim_time"),
                     "params_file": FindPackageShare("ardupilot_cartographer").find(
                         "ardupilot_cartographer"
                     )
@@ -52,6 +57,9 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
+            # Arguments
+            use_sim_time_arg,
+            # nodes
             navigation,
             twist_stamper,
         ]
