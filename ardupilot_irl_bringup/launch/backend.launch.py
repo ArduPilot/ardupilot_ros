@@ -29,10 +29,38 @@ def generate_launch_description():
         description="Baudrate for serial transport (ignored for UDP)",
     )
 
+    robot_radius_arg = DeclareLaunchArgument(
+        "robot_radius",
+        default_value="0.35",
+        description="Radius of the robot in meters",
+    )
+
+    min_clearance_arg = DeclareLaunchArgument(
+        "min_clearance",
+        default_value="0.1",
+        description="Minimum clearance from obstacles in meters (added to robot_radius for inflation)",
+    )
+
+    max_speed_arg = DeclareLaunchArgument(
+        "max_speed",
+        default_value="1.0",
+        description="Maximum linear speed of the robot in m/s",
+    )
+
+    max_angular_speed_arg = DeclareLaunchArgument(
+        "max_angular_speed",
+        default_value="1.0",
+        description="Maximum angular speed of the robot in rad/s",
+    )
+
     # Get launch configurations
     transport = LaunchConfiguration("micro_ros_transport")
     port = LaunchConfiguration("micro_ros_port")
     baudrate = LaunchConfiguration("micro_ros_baudrate")
+    robot_radius = LaunchConfiguration("robot_radius")
+    min_clearance = LaunchConfiguration("min_clearance")
+    max_speed = LaunchConfiguration("max_speed")
+    max_angular_speed = LaunchConfiguration("max_angular_speed")
 
     # Micro-ROS agent for UDP transport
     micro_ros_agent_udp = Node(
@@ -91,6 +119,10 @@ def generate_launch_description():
                 ),
                 launch_arguments={
                     "use_sim_time": "false",
+                    "robot_radius": robot_radius,
+                    "min_clearance": min_clearance,
+                    "max_speed": max_speed,
+                    "max_angular_speed": max_angular_speed,
                 }.items(),
             ),
         ]
@@ -102,6 +134,10 @@ def generate_launch_description():
             micro_ros_transport_arg,
             micro_ros_port_arg,
             micro_ros_baudrate_arg,
+            robot_radius_arg,
+            min_clearance_arg,
+            max_speed_arg,
+            max_angular_speed_arg,
             # Nodes
             micro_ros_agent_udp,
             micro_ros_agent_serial,

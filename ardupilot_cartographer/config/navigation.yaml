@@ -114,6 +114,7 @@ global_costmap:
           data_type: "LaserScan"
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
+        inflation_radius: 0.9
 
 local_costmap:
   local_costmap:
@@ -139,6 +140,7 @@ local_costmap:
           data_type: "LaserScan"
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
+        inflation_radius: 0.9
 
 planner_server:
   ros__parameters:

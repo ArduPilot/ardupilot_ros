@@ -147,8 +147,8 @@ building a map of the world and object avoidance during path planning.
 Run the following commands to bring up the simulation world and Ardupilot:
 ```bash
 cd ~/ros2_ws
-source ./install/setup.bash
-ros2 launch ardupilot_gz_bringup iris_maze.launch.py lidar_dim:=2
+source ./install/setup.bashros2 launch ardupilot_gz_bringup iris_maze.launch.py lidar_dim:=2
+
 ```
 
 Cartographer:
@@ -212,7 +212,7 @@ ros2 launch ardupilot_irl_bringup backend.launch.py micro_ros_transport=serial m
 ```bash
 cd ~/ros2_ws
 source ./install/setup.bash
-ros2 launch ardupilot_irl_bringup backend.launch.py micro_ros_transport=udp4 micro_ros_port=2019
+ros2 launch ardupilot_irl_bringup backend.launch.py micro_ros_transport:=udp4 micro_ros_port:=2019
 ```
 
 >[!NOTE]
@@ -226,11 +226,29 @@ source ./install/setup.bash
 ros2 launch ardupilot_viz all_gui.launch.py
 ```
 
+### Tuning NAV2:
+
+In both the simulator and Real-life bringups, the vehicle's physical capabilities can be input.
+
+They are used as arguments to ``ros2 launch ardupilot_cartographer navigation.launch.py`` (in simulation mode)
+or ``ros2 launch ardupilot_irl_bringup backend.launch.py`` (in real-life).
+
+The arguments consist of:
+- ``robot_radius``: Vehicle radius in m, measured from the ``base_link`` (default 0.35)
+- ``min_clearance``: Desired minimum clearance given to obstacles in m (default 0.1)
+- ``max_speed``: Maximum horizontal velocity in m/s (default 1)
+- ``max_angular_speed``: Maximum horizontal angular speed in rad/sec (default 1)
+
+>[!NOTE]
+>The NAV2 bringup can accept arguments for ``robot_radius`` (robot radius in m), ``min_clearance`` (desired minimum
+> clearance given to obstacles in m), ``max_speed``  and ``max_angular_speed``
+
 ## Contribution Guideline
 
 * Ensure the [pre-commit](https://github.com/pre-commit/pre-commit) hooks pass locally before creating your pull request by installing the hooks before committing.
    ```bash
    pre-commit install
    git commit
+   pre-commit run --all-files
    ```
 * See the [ArduPilot Contributing Guide](https://github.com/ArduPilot/ardupilot/blob/master/.github/CONTRIBUTING.md)
