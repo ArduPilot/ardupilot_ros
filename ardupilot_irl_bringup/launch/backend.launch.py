@@ -1,7 +1,12 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from launch.actions import IncludeLaunchDescription, GroupAction, DeclareLaunchArgument
+from launch.actions import (
+    IncludeLaunchDescription,
+    GroupAction,
+    DeclareLaunchArgument,
+    TimerAction,
+)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PythonExpression
@@ -128,6 +133,13 @@ def generate_launch_description():
         ]
     )
 
+    # Delay cartographer and navigation by 3 seconds
+    # Ohterwise they may start before micro-ROS agent is ready to accept connections
+    # This can cause ArduPilot DDS client to fail with a "Participant session request failure"
+    delayed_cartographer = TimerAction(period=3.0, actions=[cartographer_node])
+
+    delayed_navigation = TimerAction(period=3.0, actions=[navigation_node])
+
     return LaunchDescription(
         [
             # Launch arguments
@@ -141,7 +153,7 @@ def generate_launch_description():
             # Nodes
             micro_ros_agent_udp,
             micro_ros_agent_serial,
-            cartographer_node,
-            navigation_node,
+            delayed_cartographer,
+            delayed_navigation,
         ]
     )
