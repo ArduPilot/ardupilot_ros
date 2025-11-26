@@ -23,6 +23,10 @@ class ArduPilotNode(Node):
         self.status_data = {}
         self.veh_type = None
 
+        # Track last data received time for connection timeout
+        self.last_data_time = None
+        self.connection_timeout = 3.0  # seconds
+
         # Callbacks will be set by GUI
         self.gui_log_callback = None
 
@@ -108,6 +112,7 @@ class ArduPilotNode(Node):
                 "lon": msg.longitude,
                 "alt": msg.altitude,
             }
+            self.last_data_time = self.get_clock().now()
 
         except Exception as e:
             self.get_logger().error(f"GPS callback error: {e}")
@@ -121,6 +126,7 @@ class ArduPilotNode(Node):
                 else msg.percentage,
                 "current": msg.current,
             }
+            self.last_data_time = self.get_clock().now()
         except Exception as e:
             self.get_logger().error(f"Battery callback error: {e}")
 
@@ -143,6 +149,7 @@ class ArduPilotNode(Node):
             self.status_data = new_status_data
             self.veh_type = msg.vehicle_type
             self.vehicle_active = True
+            self.last_data_time = self.get_clock().now()
 
         except Exception as e:
             self.get_logger().error(f"Status callback error: {e}")
@@ -152,6 +159,17 @@ class ArduPilotNode(Node):
         if self.veh_type in mavlinkutils.VEHICLE_TYPES:
             return mavlinkutils.VEHICLE_TYPES[self.veh_type].upper()
         return "UNKNOWN"
+
+    def is_data_fresh(self):
+        """Check if we've received data recently (within timeout period)."""
+        if self.last_data_time is None:
+            return False
+
+        current_time = self.get_clock().now()
+        time_since_data = (
+            current_time.nanoseconds - self.last_data_time.nanoseconds
+        ) / 1e9
+        return time_since_data < self.connection_timeout
 
     def arm_vehicle(self):
         """ARM command - uses a service call"""
@@ -281,6 +299,11 @@ class ArduPilotNode(Node):
 
     def prearm_check(self):
         """Request pre-arm check using service call"""
+        # Only run if vehicle is connected and data is fresh
+        if not self.vehicle_active or not self.is_data_fresh():
+            self.get_logger().debug("Skipping pre-arm check - vehicle not connected")
+            return
+
         try:
             client = self.create_client(Trigger, "/ap/prearm_check")
 
