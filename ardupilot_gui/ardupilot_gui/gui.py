@@ -684,11 +684,13 @@ class ArduPilotGUI(QMainWindow):
 
     def _update_connection_status(self):
         """Update connection status."""
+        # Check if data exists AND is fresh (received within timeout)
         data_received = any(
             [self.node.gps_data, self.node.battery_data, self.node.status_data]
         )
+        data_is_fresh = self.node.is_data_fresh()
 
-        if data_received:
+        if data_received and data_is_fresh:
             self.connection_label.setText("DDS Status: Connected\nReceiving Data")
             connected_style = (
                 "QLabel { background-color: #ccffcc; "
