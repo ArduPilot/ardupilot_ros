@@ -63,7 +63,7 @@ controller_server:
     # enable_stamped_cmd_vel: True
     use_sim_time: *default_use_sim_time
     failure_tolerance: 0.3
-    controller_frequency: 10.0  # Reduced from default 20Hz
+    controller_frequency: 10.0
     progress_checker_plugin: "progress_checker"
     goal_checker_plugins: ["general_goal_checker"]
     controller_plugins: ["FollowPath"]
@@ -74,21 +74,26 @@ controller_server:
     general_goal_checker:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 0.25
+      xy_goal_tolerance: 0.40
+      yaw_goal_tolerance: 6.28
     FollowPath:
-      plugin: "dwb_core::DWBLocalPlanner"
-      max_vel_x: 0.5
-      max_vel_y: 0.5
-      max_vel_theta: 1.0
-      max_speed_xy: 0.707
-      acc_lim_x: 2.5
-      acc_lim_y: 0.0
-      acc_lim_theta: 3.2
-      decel_lim_x: -2.5
-      decel_lim_y: 0.0
-      decel_lim_theta: -3.2
-      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
+      plugin: "nav2_graceful_controller::GracefulController"
+      transform_tolerance: 0.1
+      min_lookahead: 0.35
+      max_lookahead: 2.0
+      initial_rotation: true
+      initial_rotation_threshold: 0.75
+      prefer_final_rotation: false
+      allow_backward: true
+      k_phi: 2.0
+      k_delta: 1.0
+      beta: 0.4
+      lambda: 2.0
+      v_linear_min: 0.1
+      v_linear_max: 0.5
+      v_angular_max: 1.0
+      v_angular_min_in_place: 1.0
+      slowdown_radius: 0.5
 
 global_costmap:
   global_costmap:
@@ -98,9 +103,9 @@ global_costmap:
       use_sim_time: *default_use_sim_time
       robot_radius: 0.35
       resolution: 0.05
-      update_frequency: 1.0  # Reduced from default 5Hz
+      update_frequency: 1.0
       publish_frequency: 1.0
-      lethal_cost_threshold: 50
+      lethal_cost_threshold: 75
       always_send_full_costmap: True
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       static_layer:
@@ -118,6 +123,7 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         inflation_radius: 0.9
+        cost_scaling_factor: 6.0
 
 local_costmap:
   local_costmap:
@@ -129,9 +135,10 @@ local_costmap:
       width: 5
       height: 5
       resolution: 0.05
-      update_frequency: 5.0  # Reduced from default 10Hz
-      publish_frequency: 2.0  # Reduced from default 5Hz
+      update_frequency: 5.0
+      publish_frequency: 2.0
       robot_radius: 0.35
+      lethal_cost_threshold: 75
       always_send_full_costmap: True
       plugins: ["voxel_layer", "inflation_layer"]
       voxel_layer:
@@ -146,14 +153,32 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         inflation_radius: 0.9
+        cost_scaling_factor: 6.0
 
 planner_server:
   ros__parameters:
-    expected_planner_frequency: 10.0  # Reduced from 20Hz
+    expected_planner_frequency: 10.0
     use_sim_time: *default_use_sim_time
     planner_plugins: ["GridBased"]
     GridBased:
-      plugin: "nav2_navfn_planner/NavfnPlanner"
+      plugin: "nav2_smac_planner/SmacPlanner2D"
+      tolerance: 0.5
+      downsample_costmap: true
+      downsampling_factor: 2
+      allow_unknown: true
+      max_iterations: 500000
+      max_on_approach_iterations: 500
+      terminal_checking_interval: 10000
+      max_planning_time: 2.0
+      cost_travel_multiplier: 8.0
+      use_final_approach_orientation: false
+      smoother:
+        max_iterations: 500
+        w_smooth: 0.3
+        w_data: 0.2
+        tolerance: 1.0e-8
+        do_refinement: true
+        refinement_num: 1
 
 smoother_server:
   ros__parameters:

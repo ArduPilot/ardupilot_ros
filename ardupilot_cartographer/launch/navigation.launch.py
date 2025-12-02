@@ -89,15 +89,15 @@ def modify_nav_config(context, *args, **kwargs):
 
         if "FollowPath" in cs_params:
             # DWB parameters for speed limits
-            cs_params["FollowPath"]["max_vel_x"] = max_speed
-            cs_params["FollowPath"]["min_vel_x"] = -max_speed
-            cs_params["FollowPath"]["max_vel_theta"] = max_angular_speed
-            cs_params["FollowPath"]["max_speed_xy"] = max_speed
+            cs_params["FollowPath"]["v_linear_max"] = max_speed
+            cs_params["FollowPath"]["v_angular_max"] = max_angular_speed
+            cs_params["FollowPath"]["v_angular_min_in_place"] = max_angular_speed
 
     # And the velocity limits
     if "velocity_smoother" in config:
         vs_params = config["velocity_smoother"]["ros__parameters"]
         vs_params["max_velocity"] = [max_speed, max_speed, max_angular_speed]
+        vs_params["min_velocity"] = [-max_speed, -max_speed, -max_angular_speed]
 
     # Write modified config to temporary file preserving order
     temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)

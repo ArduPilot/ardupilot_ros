@@ -16,6 +16,7 @@
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>topic_tools</exec_depend>
   <exec_depend>twist_stamper</exec_depend>
+  <exec_depend>nav2_graceful_controller</exec_depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
