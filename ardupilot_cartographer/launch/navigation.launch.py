@@ -157,13 +157,13 @@ def generate_launch_description():
 
     robot_radius_arg = DeclareLaunchArgument(
         "robot_radius",
-        default_value="0.35",
+        default_value="0.40",
         description="Radius of the robot in meters",
     )
 
     min_clearance_arg = DeclareLaunchArgument(
         "min_clearance",
-        default_value="0.1",
+        default_value="0.15",
         description="Minimum clearance from obstacles in meters (added to robot_radius for inflation)",
     )
 
