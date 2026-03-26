@@ -31,7 +31,10 @@ class ArduPilotGUI(QMainWindow):
         super().__init__()
         self.node = node
         self.ros_thread = None
-        self.setWindowTitle("ArduPilot ROS2 GUI")
+        if self.node.vehicle_sysid > 0:
+            self.setWindowTitle(f"ArduPilot ROS2 GUI - SYSID {self.node.vehicle_sysid}")
+        else:
+            self.setWindowTitle("ArduPilot ROS2 GUI")
         self.setGeometry(100, 100, 800, 900)  # Increased height for pre-arm box
 
         # Connect signals to their handlers (runs in GUI thread)

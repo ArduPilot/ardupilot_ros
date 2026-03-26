@@ -23,6 +23,15 @@ class ArduPilotNode(Node):
         self.status_data = {}
         self.veh_type = None
 
+        # Vehicle sysid will be set from launch argument. Sysid of 0 means no sysid prefix (for old AP versions)
+        self.vehicle_sysid = (
+            self.declare_parameter("sysid", 1).get_parameter_value().integer_value
+        )
+        if self.vehicle_sysid > 0:
+            self.topic_prefix = f"/ap/v{self.vehicle_sysid}"
+        else:
+            self.topic_prefix = "/ap"
+
         # Track last data received time for connection timeout
         self.last_data_time = None
         self.connection_timeout = 3.0  # seconds
@@ -39,9 +48,9 @@ class ArduPilotNode(Node):
         )
 
         # Topic names
-        self.gps_topic = "/ap/navsat"
-        self.battery_topic = "/ap/battery"
-        self.status_topic = "/ap/status"
+        self.gps_topic = f"{self.topic_prefix}/navsat"
+        self.battery_topic = f"{self.topic_prefix}/battery"
+        self.status_topic = f"{self.topic_prefix}/status"
 
         # Add velocity data storage
         self.ap_velocity_data = None
@@ -175,7 +184,7 @@ class ArduPilotNode(Node):
         """ARM command - uses a service call"""
         self.get_logger().info("ARM command requested")
         try:
-            client = self.create_client(ArmMotors, "/ap/arm_motors")
+            client = self.create_client(ArmMotors, f"{self.topic_prefix}/arm_motors")
 
             # Wait for service to be available
             if not client.wait_for_service(timeout_sec=1.0):
@@ -200,7 +209,7 @@ class ArduPilotNode(Node):
     def disarm_vehicle(self):
         """DISARM command - uses a service call"""
         try:
-            client = self.create_client(ArmMotors, "/ap/arm_motors")
+            client = self.create_client(ArmMotors, f"{self.topic_prefix}/arm_motors")
 
             # Wait for service to be available
             if not client.wait_for_service(timeout_sec=1.0):
@@ -225,7 +234,7 @@ class ArduPilotNode(Node):
     def mode_switch(self, mode_string):
         """Switch flight mode using service call"""
         try:
-            client = self.create_client(ModeSwitch, "/ap/mode_switch")
+            client = self.create_client(ModeSwitch, f"{self.topic_prefix}/mode_switch")
 
             # Wait for service to be available
             if not client.wait_for_service(timeout_sec=1.0):
@@ -273,7 +282,9 @@ class ArduPilotNode(Node):
     def takeoff_copter(self, alt):
         """Service call to takeoff a copter to alt m"""
         try:
-            client = self.create_client(Takeoff, "/ap/experimental/takeoff")
+            client = self.create_client(
+                Takeoff, f"{self.topic_prefix}/experimental/takeoff"
+            )
 
             # Wait for service to be available
             if not client.wait_for_service(timeout_sec=1.0):
@@ -305,7 +316,7 @@ class ArduPilotNode(Node):
             return
 
         try:
-            client = self.create_client(Trigger, "/ap/prearm_check")
+            client = self.create_client(Trigger, f"{self.topic_prefix}/prearm_check")
 
             # Wait for service to be available
             if not client.wait_for_service(timeout_sec=1.0):
@@ -366,7 +377,12 @@ class ArduPilotNode(Node):
     def create_velocity_subscriptions(self):
         """Create subscriptions for velocity monitoring"""
         velocity_subscriptions = [
-            (TwistStamped, "/ap/cmd_vel", self.ap_cmd_vel_callback, self.sensor_qos),
+            (
+                TwistStamped,
+                f"{self.topic_prefix}/cmd_vel",
+                self.ap_cmd_vel_callback,
+                self.sensor_qos,
+            ),
         ]
 
         for msg_type, topic, callback, qos in velocity_subscriptions:
@@ -377,7 +393,7 @@ class ArduPilotNode(Node):
                 self.get_logger().warn(f"Failed to subscribe to {topic}: {e}")
 
     def ap_cmd_vel_callback(self, msg):
-        """Monitor velocity commands sent to ArduPilot via /ap/cmd_vel"""
+        """Monitor velocity commands sent to ArduPilot via /ap/v<sysid>/cmd_vel"""
         try:
             # Store ArduPilot velocity data
             self.ap_velocity_data = {
