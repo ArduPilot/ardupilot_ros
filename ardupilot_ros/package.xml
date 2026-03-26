@@ -9,6 +9,7 @@
   <maintainer email="sharma.sanket272@gmail.com">Sanket Sharma</maintainer>
   <license>GPLv3</license>
   <exec_depend>ardupilot_cartographer</exec_depend>
+  <exec_depend>ardupilot_gui</exec_depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>
