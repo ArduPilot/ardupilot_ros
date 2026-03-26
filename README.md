@@ -49,6 +49,34 @@ Refer to individual package READMEs for detailed usage instructions:
 
 * [ardupilot_cartographer](ardupilot_cartographer): Instructions to run Cartographer SLAM.
 
+## ArduPilot GUI
+
+The ``ardupilot_gui`` contains a simple ROS2 GUI for viewing and controlling the vehicle. It can be
+launched via:
+
+```bash
+cd ~/ros2_ws
+source /opt/ros/humble/setup.bash
+source ./install/setup.sh
+ros2 launch ardupilot_gui ardupilot_gui.launch.py
+```
+
+By default the GUI will connect to the vehicle with a System ID of 1 (Ardupilot default when using ``DDS_USE_NS``=1)
+
+If using a different System ID, use arguments to specify:
+
+```bash
+# Connect to vehicle with System ID 2
+ros2 launch ardupilot_gui ardupilot_gui.launch.py sysid:=2
+```
+
+For usage with older versions of ArduPilot that do not have the ``DDS_USE_NS`` parameter, use a ``sysid`` of 0:
+
+```bash
+# Connect to vehicle that doesn't use the DDS_USE_NS parameter
+ros2 launch ardupilot_gui ardupilot_gui.launch.py sysid:=0
+```
+
 ## Contribution Guideline
 
 * Ensure the [pre-commit](https://github.com/pre-commit/pre-commit) hooks pass locally before creating your pull request by installing the hooks before committing.
