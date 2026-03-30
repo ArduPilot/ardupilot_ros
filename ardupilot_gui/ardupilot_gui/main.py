@@ -7,8 +7,8 @@ import signal
 import rclpy
 from PyQt5.QtWidgets import QApplication
 
-from .ardupilot_node import ArduPilotNode
-from .gui import ArduPilotGUI
+from ardupilot_gui.ardupilot_node import ArduPilotNode
+from ardupilot_gui.gui import ArduPilotGUI
 
 
 # Setup signal handler for graceful shutdown
