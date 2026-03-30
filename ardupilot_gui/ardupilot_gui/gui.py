@@ -147,7 +147,7 @@ class ArduPilotGUI(QMainWindow):
         layout.addWidget(mode_frame)
 
         # Add copter-specific controls
-        copter_frame = self._create_copter_controls()
+        copter_frame = self._create_copter_plane_controls()
         layout.addWidget(copter_frame)
 
         # Add velocity control section
@@ -378,15 +378,15 @@ class ArduPilotGUI(QMainWindow):
 
     def _update_vehicle_specific_controls(self):
         """Enable/disable vehicle-specific controls based on vehicle type."""
-        is_copter = self.node.get_vehicle_type() == "COPTER"
+        is_copter_or_plane = self.node.get_vehicle_type() in ["COPTER", "PLANE"]
 
         # Enable/disable copter controls instead of hiding them
-        self.copter_frame.setEnabled(is_copter)
+        self.copter_plane_frame.setEnabled(is_copter_or_plane)
 
-        if is_copter:
-            self.copter_frame.setStyleSheet("")
+        if is_copter_or_plane:
+            self.copter_plane_frame.setStyleSheet("")
         else:
-            self.copter_frame.setStyleSheet("QFrame { color: #999999; }")
+            self.copter_plane_frame.setStyleSheet("QFrame { color: #999999; }")
 
     def _update_mode_button_availability(self, status_available):
         """Enable/disable mode buttons based on vehicle type and status."""
@@ -395,7 +395,6 @@ class ArduPilotGUI(QMainWindow):
             self.mode_guided_btn,
             self.mode_auto_btn,
             self.mode_rtl_btn,
-            self.mode_loiter_btn,
         ]
 
         for button in common_buttons:
@@ -406,17 +405,29 @@ class ArduPilotGUI(QMainWindow):
             # Rover only
             self.mode_hold_btn.setEnabled(status_available)
             self.mode_manual_btn.setEnabled(status_available)
+            self.mode_brake_btn.setEnabled(False)
+            self.takeoff_button.setEnabled(False)
+            self.mode_land_btn.setEnabled(False)
+        elif self.node.get_vehicle_type() == "COPTER":
+            # Copter only
+            self.mode_hold_btn.setEnabled(False)
+            self.mode_manual_btn.setEnabled(False)
+            self.mode_brake_btn.setEnabled(status_available)
+            self.takeoff_button.setEnabled(status_available)
+            self.mode_land_btn.setEnabled(status_available)
+        elif self.node.get_vehicle_type() == "PLANE":
+            # Plane only
+            self.mode_hold_btn.setEnabled(False)
+            self.mode_manual_btn.setEnabled(False)
+            self.mode_brake_btn.setEnabled(False)
+            self.takeoff_button.setEnabled(status_available)
+            self.mode_land_btn.setEnabled(False)
         else:
             self.mode_hold_btn.setEnabled(False)
             self.mode_manual_btn.setEnabled(False)
-
-        if self.node.get_vehicle_type() == "COPTER":
-            # Copter only
-            self.mode_land_btn.setEnabled(status_available)
-            self.takeoff_button.setEnabled(status_available)
-        else:
-            self.mode_land_btn.setEnabled(False)
+            self.mode_brake_btn.setEnabled(False)
             self.takeoff_button.setEnabled(False)
+            self.mode_land_btn.setEnabled(False)
 
     def set_mode(self, mode):
         """Send mode change command to vehicle."""
@@ -451,7 +462,7 @@ class ArduPilotGUI(QMainWindow):
 
     def _update_mode_buttons(self, mode):
         """Set colors for mode buttons based on current mode."""
-        modes = ["HOLD", "GUIDED", "AUTO", "MANUAL", "RTL", "LOITER", "LAND"]
+        modes = ["HOLD", "GUIDED", "AUTO", "MANUAL", "RTL", "BRAKE", "LAND"]
         btn_normal = (
             "QPushButton { background-color: #2196F3; color: white; "
             "padding: 8px; border-radius: 3px; margin: 2px; "
@@ -509,8 +520,8 @@ class ArduPilotGUI(QMainWindow):
         self.mode_rtl_btn = self._create_mode_button(
             "RTL", lambda: self.set_mode("RTL")
         )
-        self.mode_loiter_btn = self._create_mode_button(
-            "LOITER", lambda: self.set_mode("LOITER")
+        self.mode_brake_btn = self._create_mode_button(
+            "BRAKE", lambda: self.set_mode("BRAKE")
         )
 
         # Add buttons to horizontal layout
@@ -519,24 +530,24 @@ class ArduPilotGUI(QMainWindow):
         mode_layout.addWidget(self.mode_auto_btn)
         mode_layout.addWidget(self.mode_manual_btn)
         mode_layout.addWidget(self.mode_rtl_btn)
-        mode_layout.addWidget(self.mode_loiter_btn)
+        mode_layout.addWidget(self.mode_brake_btn)
 
         mode_main_layout.addLayout(mode_layout)
 
         return mode_frame
 
-    def _create_copter_controls(self):
+    def _create_copter_plane_controls(self):
         """Create copter-specific controls (takeoff, land)."""
-        self.copter_frame = QFrame()
-        self.copter_frame.setFrameStyle(QFrame.StyledPanel)
-        self.copter_frame.setMaximumHeight(100)
+        self.copter_plane_frame = QFrame()
+        self.copter_plane_frame.setFrameStyle(QFrame.StyledPanel)
+        self.copter_plane_frame.setMaximumHeight(100)
 
-        copter_main_layout = QVBoxLayout(self.copter_frame)
+        copter_plane_main_layout = QVBoxLayout(self.copter_plane_frame)
 
         # Title
-        copter_title = QLabel("Copter Controls:")
-        copter_title.setFont(QFont("Arial", 12, QFont.Bold))
-        copter_main_layout.addWidget(copter_title)
+        copter_plane_title = QLabel("Copter/Plane Controls:")
+        copter_plane_title.setFont(QFont("Arial", 12, QFont.Bold))
+        copter_plane_main_layout.addWidget(copter_plane_title)
 
         # Controls layout
         controls_layout = QHBoxLayout()
@@ -583,9 +594,9 @@ class ArduPilotGUI(QMainWindow):
         self.mode_land_btn.setStyleSheet(land_style)
         controls_layout.addWidget(self.mode_land_btn)
 
-        copter_main_layout.addLayout(controls_layout)
+        copter_plane_main_layout.addLayout(controls_layout)
 
-        return self.copter_frame
+        return self.copter_plane_frame
 
     def _create_velocity_control(self):
         """Create velocity information display (read-only) for /ap/cmd_vel only."""
