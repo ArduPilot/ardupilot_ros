@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import QTimer, Qt, pyqtSignal
 from PyQt5.QtGui import QFont, QTextCursor
 
-from .ros_thread import ROSThread
+from ardupilot_gui.ros_thread import ROSThread
 
 
 class ArduPilotGUI(QMainWindow):

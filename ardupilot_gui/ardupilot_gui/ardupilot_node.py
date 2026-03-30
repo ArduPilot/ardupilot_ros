@@ -9,7 +9,7 @@ from geometry_msgs.msg import TwistStamped
 from sensor_msgs.msg import NavSatFix, BatteryState
 from std_srvs.srv import Trigger
 from ardupilot_msgs.msg import Status
-from . import mavlinkutils
+from ardupilot_gui import mavlinkutils
 from ardupilot_msgs.srv import ArmMotors, ModeSwitch, Takeoff
 
 
