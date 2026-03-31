@@ -21,6 +21,7 @@ setup(
         "nav_msgs",
         "std_msgs",
         "ardupilot_msgs",
+        "pymavlink",
     ],
     zip_safe=True,
     maintainer="Stephen Dade",
