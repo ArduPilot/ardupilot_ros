@@ -1,0 +1,159 @@
+from launch import LaunchDescription
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+from launch.actions import (
+    IncludeLaunchDescription,
+    GroupAction,
+    DeclareLaunchArgument,
+    TimerAction,
+)
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.conditions import IfCondition
+from launch.substitutions import LaunchConfiguration, PythonExpression
+
+from pathlib import Path
+
+
+def generate_launch_description():
+    # Declare launch arguments
+    micro_ros_transport_arg = DeclareLaunchArgument(
+        "micro_ros_transport",
+        default_value="udp4",
+        description="Transport type for micro-ROS agent (udp4, udp6, serial, etc.)",
+    )
+
+    micro_ros_port_arg = DeclareLaunchArgument(
+        "micro_ros_port",
+        default_value="2019",
+        description="Port number for UDP transport or serial device path",
+    )
+
+    micro_ros_baudrate_arg = DeclareLaunchArgument(
+        "micro_ros_baudrate",
+        default_value="115200",
+        description="Baudrate for serial transport (ignored for UDP)",
+    )
+
+    robot_radius_arg = DeclareLaunchArgument(
+        "robot_radius",
+        default_value="0.35",
+        description="Radius of the robot in meters",
+    )
+
+    min_clearance_arg = DeclareLaunchArgument(
+        "min_clearance",
+        default_value="0.1",
+        description="Minimum clearance from obstacles in meters (added to robot_radius for inflation)",
+    )
+
+    max_speed_arg = DeclareLaunchArgument(
+        "max_speed",
+        default_value="1.0",
+        description="Maximum linear speed of the robot in m/s",
+    )
+
+    max_angular_speed_arg = DeclareLaunchArgument(
+        "max_angular_speed",
+        default_value="1.0",
+        description="Maximum angular speed of the robot in rad/s",
+    )
+
+    # Get launch configurations
+    transport = LaunchConfiguration("micro_ros_transport")
+    port = LaunchConfiguration("micro_ros_port")
+    baudrate = LaunchConfiguration("micro_ros_baudrate")
+    robot_radius = LaunchConfiguration("robot_radius")
+    min_clearance = LaunchConfiguration("min_clearance")
+    max_speed = LaunchConfiguration("max_speed")
+    max_angular_speed = LaunchConfiguration("max_angular_speed")
+
+    # Micro-ROS agent for UDP transport
+    micro_ros_agent_udp = Node(
+        package="micro_ros_agent",
+        executable="micro_ros_agent",
+        arguments=[transport, "--port", port],
+        output="screen",
+        condition=IfCondition(
+            PythonExpression(["'", transport, "'.startswith('udp')"])
+        ),
+    )
+
+    # Micro-ROS agent for serial transport
+    micro_ros_agent_serial = Node(
+        package="micro_ros_agent",
+        executable="micro_ros_agent",
+        arguments=["serial", "--dev", port, "-b", baudrate],
+        output="screen",
+        condition=IfCondition(PythonExpression(["'", transport, "' == 'serial'"])),
+    )
+
+    cartographer_node = GroupAction(
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    str(
+                        Path(
+                            FindPackageShare("ardupilot_cartographer").find(
+                                "ardupilot_cartographer"
+                            ),
+                            "launch",
+                            "cartographer.launch.py",
+                        )
+                    )
+                ),
+                launch_arguments={
+                    "use_sim_time": "false",
+                }.items(),
+            ),
+        ]
+    )
+
+    navigation_node = GroupAction(
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    str(
+                        Path(
+                            FindPackageShare("ardupilot_cartographer").find(
+                                "ardupilot_cartographer"
+                            ),
+                            "launch",
+                            "navigation.launch.py",
+                        )
+                    )
+                ),
+                launch_arguments={
+                    "use_sim_time": "false",
+                    "robot_radius": robot_radius,
+                    "min_clearance": min_clearance,
+                    "max_speed": max_speed,
+                    "max_angular_speed": max_angular_speed,
+                }.items(),
+            ),
+        ]
+    )
+
+    # Delay cartographer and navigation by 3 seconds
+    # Ohterwise they may start before micro-ROS agent is ready to accept connections
+    # This can cause ArduPilot DDS client to fail with a "Participant session request failure"
+    delayed_cartographer = TimerAction(period=3.0, actions=[cartographer_node])
+
+    delayed_navigation = TimerAction(period=3.0, actions=[navigation_node])
+
+    return LaunchDescription(
+        [
+            # Launch arguments
+            micro_ros_transport_arg,
+            micro_ros_port_arg,
+            micro_ros_baudrate_arg,
+            robot_radius_arg,
+            min_clearance_arg,
+            max_speed_arg,
+            max_angular_speed_arg,
+            # Nodes
+            micro_ros_agent_udp,
+            micro_ros_agent_serial,
+            delayed_cartographer,
+            delayed_navigation,
+        ]
+    )

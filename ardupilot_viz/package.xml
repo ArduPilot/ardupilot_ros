@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>ardupilot_viz</name>
+  <version>0.0.0</version>
+  <description>ArduPilot ROS visualization tools</description>
+  <maintainer email="stephen_dade@hotmail.com">Stephen Dade</maintainer>
+  <license>GPLv3+</license>
+  <exec_depend>cartographer_rviz</exec_depend>
+  <exec_depend>nav2_rviz_plugins</exec_depend>
+  <exec_depend>ardupilot_gui</exec_depend>
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

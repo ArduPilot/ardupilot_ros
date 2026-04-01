@@ -1,15 +1,21 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-  <name>ardupilot_ros</name>
+  <name>ardupilot_sim_bringup</name>
   <version>1.0.0</version>
-  <description>ardupilot_ros meta-package</description>
+  <description>ardupilot_sim_bringup meta-package</description>
   <!-- <maintainer email="">Ryan Friedman</maintainer> -->
   <maintainer email="pedrofuoco6@gmail.com">Pedro Fuoco</maintainer>
   <maintainer email="sharma.sanket272@gmail.com">Sanket Sharma</maintainer>
   <license>GPLv3</license>
   <exec_depend>ardupilot_cartographer</exec_depend>
   <exec_depend>ardupilot_gui</exec_depend>
+  <exec_depend>ardupilot_gz_description</exec_depend>
+  <exec_depend>ardupilot_gz_gazebo</exec_depend>
+  <exec_depend>ardupilot_gz_bringup</exec_depend>
+  <exec_depend>ardupilot_sitl</exec_depend>
+  <exec_depend>ros_gz_sim</exec_depend>
+  <exec_depend>ardupilot_viz</exec_depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>

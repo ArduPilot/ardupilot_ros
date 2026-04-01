@@ -63,12 +63,12 @@ jobs:
         run: |
           source /opt/ros/humble/setup.bash
           export GZ_VERSION=harmonic
-          colcon build --packages-up-to ardupilot_ros ardupilot_gz_bringup --cmake-args -DBUILD_TESTING=ON
+          colcon build --packages-up-to ardupilot_sim_bringup ardupilot_gz_bringup ardupilot_irl_bringup --cmake-args -DBUILD_TESTING=ON
       - name: Test with colcon
         shell: 'bash'
         run: |
           source install/setup.bash
-          colcon test --packages-select ardupilot_ros --event-handlers=console_cohesion+
+          colcon test --packages-select ardupilot_sim_bringup --event-handlers=console_cohesion+
       - name: Report colcon test results
         run: |
           colcon test-result --all --verbose
