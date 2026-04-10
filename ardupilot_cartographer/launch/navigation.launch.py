@@ -1,7 +1,12 @@
 import os
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction
+from launch.actions import (
+    DeclareLaunchArgument,
+    IncludeLaunchDescription,
+    GroupAction,
+    OpaqueFunction,
+)
 from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.conditions import IfCondition
@@ -13,7 +18,15 @@ from pathlib import Path
 """Generate a launch description for the navigation example."""
 
 
-def generate_launch_description():
+def setup_navigation(context):
+    """Setup navigation with dynamic topic prefix based on sysid."""
+    sysid = int(context.launch_configurations["sysid"])
+
+    if sysid > 0:
+        topic_prefix = f"/ap/v{sysid}"
+    else:
+        topic_prefix = "/ap"
+
     # Navigation
     navigation = GroupAction(
         actions=[
@@ -51,22 +64,9 @@ def generate_launch_description():
         ],
         remappings=[
             ("cmd_vel_in", "cmd_vel"),
-            ("cmd_vel_out", "ap/cmd_vel"),
+            ("cmd_vel_out", f"{topic_prefix}/cmd_vel"),
         ],
     )
-
-    # Robot description.
-
-    # Ensure `SDF_PATH` is populated as `sdformat_urdf`` uses this rather
-    # than `GZ_SIM_RESOURCE_PATH` to locate resources.
-    if "GZ_SIM_RESOURCE_PATH" in os.environ:
-        gz_sim_resource_path = os.environ["GZ_SIM_RESOURCE_PATH"]
-
-        if "SDF_PATH" in os.environ:
-            sdf_path = os.environ["SDF_PATH"]
-            os.environ["SDF_PATH"] = sdf_path + ":" + gz_sim_resource_path
-        else:
-            os.environ["SDF_PATH"] = gz_sim_resource_path
 
     # RViz.
     rviz = Node(
@@ -87,13 +87,33 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration("rviz")),
     )
 
+    return [navigation, twist_stamper, rviz]
+
+
+def generate_launch_description():
+    # Ensure `SDF_PATH` is populated as `sdformat_urdf` uses this rather
+    # than `GZ_SIM_RESOURCE_PATH` to locate resources.
+    if "GZ_SIM_RESOURCE_PATH" in os.environ:
+        gz_sim_resource_path = os.environ["GZ_SIM_RESOURCE_PATH"]
+
+        if "SDF_PATH" in os.environ:
+            sdf_path = os.environ["SDF_PATH"]
+            os.environ["SDF_PATH"] = sdf_path + ":" + gz_sim_resource_path
+        else:
+            os.environ["SDF_PATH"] = gz_sim_resource_path
+
+    sysid_arg = DeclareLaunchArgument(
+        "sysid",
+        default_value="0",
+        description="System ID for the MAVLink vehicle. 0 means no sysid prefix.",
+    )
+
     return LaunchDescription(
         [
             DeclareLaunchArgument(
                 "rviz", default_value="true", description="Open RViz."
             ),
-            navigation,
-            twist_stamper,
-            rviz,
+            sysid_arg,
+            OpaqueFunction(function=setup_navigation),
         ]
     )
