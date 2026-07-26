@@ -27,6 +27,15 @@ cd ~/ros2_ws/src
 git clone git@github.com:ardupilot/ardupilot_ros.git
 ```
 
+If using a non-default Gazebo version for your ROS distro (e.g. Gazebo Harmonic with ROS 2 Humble),
+add Gazebo's rosdep sources so `package.xml` dependencies such as `ros_gz_sim` resolve correctly.
+See the [Gazebo rosdep guide](https://gazebosim.org/docs/harmonic/ros_installation#using-a-specific-gazebo-version-with-ros-2)
+for details:
+```bash
+sudo wget https://raw.githubusercontent.com/osrf/osrf-rosdep/master/gz/00-gazebo.list -O /etc/ros/rosdep/sources.list.d/00-gazebo.list
+rosdep update
+```
+
 Install dependencies using rosdep:
 ```bash
 cd ~/ros2_ws
