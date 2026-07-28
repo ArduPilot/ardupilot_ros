@@ -1,0 +1,24 @@
+# Controller Tuning Guide
+# 1. Get the correct hover throttle (most important)
+# 2. Start with P control for both position and velocity. Start with smaller value (increase no more than 20%)
+# 3. If z direction position has steady-state error, give a little p_i.
+# 4. I don't think it is necessary to use position d and velocity i and d.
+
+/**:
+  ros__parameters:
+    controller:
+      body_rate_control: false
+      attitude_control: false
+      acceleration_control: true
+      
+      position_p: [1.5, 1.5, 1.5]
+      position_i: [0.0, 0.0, 0.1]
+      position_d: [0.0, 0.0, 0.0]
+      
+      velocity_p: [1.0, 1.0, 1.0]
+      velocity_i: [0.0, 0.0, 0.0]
+      velocity_d: [0.0, 0.0, 0.0]
+      
+      attitude_control_tau: 0.3
+      hover_thrust: 0.70
+      verbose: false

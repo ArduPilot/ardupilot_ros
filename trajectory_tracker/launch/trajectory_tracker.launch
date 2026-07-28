@@ -1,0 +1,4 @@
+<launch>
+	<rosparam file="$(find trajectory_tracker)/cfg/controller_param.yaml" ns="controller"/>
+	<node pkg="trajectory_tracker" type="trajectory_tracker_node" name="trajectory_tracker_node" output="screen" />
+</launch>
