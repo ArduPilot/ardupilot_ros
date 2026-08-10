@@ -599,7 +599,7 @@ class ArduPilotGUI(QMainWindow):
         return self.copter_plane_frame
 
     def _create_velocity_control(self):
-        """Create velocity information display (read-only) for /ap/cmd_vel only."""
+        """Create velocity information display (read-only) for /ap/v1/cmd_vel only."""
         vel_frame = QFrame()
         vel_frame.setFrameStyle(QFrame.StyledPanel)
         vel_frame.setMaximumHeight(160)
@@ -612,7 +612,7 @@ class ArduPilotGUI(QMainWindow):
         vel_layout.addWidget(vel_title)
 
         # Topic title
-        ap_title = QLabel("/ap/cmd_vel")
+        ap_title = QLabel(f"{self.node.topic_prefix}/cmd_vel")
         ap_title.setFont(QFont("Arial", 10, QFont.Bold))
         ap_title.setStyleSheet("QLabel { color: #1976D2; }")
         vel_layout.addWidget(ap_title)

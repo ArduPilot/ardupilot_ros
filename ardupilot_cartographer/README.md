@@ -80,13 +80,16 @@ source install/setup.sh
 ros2 launch ardupilot_cartographer cartographer.launch.py rviz:=false
 ```
 
-Launch nav2:
+Launch Nav2:
 
 ```bash
 cd ~/ros2_ws
 source install/setup.sh
-ros2 launch ardupilot_cartographer navigation.launch.py
+ros2 launch ardupilot_cartographer navigation.launch.py sysid:=0
 ```
+
+Note when using the ``DDS_USE_NS=1`` parameter in ArduPilot, the ``sysid:=n`` needs to be used in Nav2,
+where ``n`` is the sysid of the vehicle.
 
 Takeoff the Copter using `mavproxy` to an altitude of 2.5m:
 
