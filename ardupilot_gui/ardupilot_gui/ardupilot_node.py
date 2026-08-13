@@ -1,7 +1,7 @@
 """
 ROS2 node for monitoring Ardupilot topics and services
 """
-
+from collections import deque
 
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
@@ -34,6 +34,7 @@ class ArduPilotNode(Node):
 
         # Track last data received time for connection timeout
         self.last_data_time = None
+        self.last_cmd_vel_data_time = None
         self.connection_timeout = 3.0  # seconds
 
         # Callbacks will be set by GUI
@@ -66,6 +67,13 @@ class ArduPilotNode(Node):
         self.pre_arm_status = False
 
         self.vehicle_active = False
+
+        self.ap_latency_sec = deque(
+            maxlen=10
+        )  # Timestamps (from AP) of the last status messages received
+        self.ap_cmd_vel_latency_sec = deque(
+            maxlen=10
+        )  # Latency of the last cmd_vel messages received
 
         self.get_logger().info("ArduPilot GUI Node initialized")
 
@@ -159,6 +167,10 @@ class ArduPilotNode(Node):
             self.veh_type = msg.vehicle_type
             self.vehicle_active = True
             self.last_data_time = self.get_clock().now()
+            self.ap_latency_sec.append(
+                self.last_data_time.nanoseconds / 1e9
+                - (msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9)
+            )
 
         except Exception as e:
             self.get_logger().error(f"Status callback error: {e}")
@@ -179,6 +191,26 @@ class ArduPilotNode(Node):
             current_time.nanoseconds - self.last_data_time.nanoseconds
         ) / 1e9
         return time_since_data < self.connection_timeout
+
+    def is_cmd_vel_fresh(self):
+        """Check if we've received cmd_vel data recently (within timeout period)."""
+        if self.last_cmd_vel_data_time is None:
+            return False
+
+        current_time = self.get_clock().now()
+        time_since_data = (
+            current_time.nanoseconds - self.last_cmd_vel_data_time.nanoseconds
+        ) / 1e9
+        return time_since_data < self.connection_timeout
+
+    def get_latency(self):
+        """Get the latency of the status message in seconds."""
+        if len(self.ap_latency_sec) == 0:
+            return float("inf")  # No data received yet
+
+        # get average of the last few timestamps to smooth out latency calculation
+        average_latency = sum(self.ap_latency_sec) / len(self.ap_latency_sec)
+        return average_latency
 
     def arm_vehicle(self):
         """ARM command - uses a service call"""
@@ -395,7 +427,20 @@ class ArduPilotNode(Node):
     def ap_cmd_vel_callback(self, msg):
         """Monitor velocity commands sent to ArduPilot via /ap/v<sysid>/cmd_vel"""
         try:
-            # Store ArduPilot velocity data
+            # Calculate average latency of the last few cmd_vel messages
+            self.last_cmd_vel_data_time = self.get_clock().now()
+            self.ap_cmd_vel_latency_sec.append(
+                self.last_cmd_vel_data_time.nanoseconds / 1e9
+                - (msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9)
+            )
+            if len(self.ap_cmd_vel_latency_sec) == 0:
+                avg_latency = float("inf")
+            else:
+                avg_latency = sum(self.ap_cmd_vel_latency_sec) / len(
+                    self.ap_cmd_vel_latency_sec
+                )
+
+            # Store ArduPilot velocity data. Note latency is in seconds, but will be displayed in ms in GUI.
             self.ap_velocity_data = {
                 "x": msg.twist.linear.x,
                 "y": msg.twist.linear.y,
@@ -403,7 +448,8 @@ class ArduPilotNode(Node):
                 "roll": msg.twist.angular.x,
                 "pitch": msg.twist.angular.y,
                 "yaw": msg.twist.angular.z,
-                "timestamp": self.get_clock().now(),
+                "timestamp": msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9,
+                "latency": avg_latency,
             }
 
             # Update GUI if callback is set

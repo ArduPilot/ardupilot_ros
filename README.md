@@ -86,6 +86,14 @@ For usage with older versions of ArduPilot that do not have the ``DDS_USE_NS`` p
 ros2 launch ardupilot_gui ardupilot_gui.launch.py sysid:=0
 ```
 
+When using in a realtime (non-simulated) environment, ensure that ``use_sim_time`` is false:
+
+```bash
+# Connect to real vehicle
+ros2 launch ardupilot_gui ardupilot_gui.launch.py use_sim_time:=false
+```
+
+
 ## Contribution Guideline
 
 * Ensure the [pre-commit](https://github.com/pre-commit/pre-commit) hooks pass locally before creating your pull request by installing the hooks before committing.

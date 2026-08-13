@@ -612,14 +612,14 @@ class ArduPilotGUI(QMainWindow):
         vel_layout.addWidget(vel_title)
 
         # Topic title
-        ap_title = QLabel("/ap/cmd_vel")
+        ap_title = QLabel(f"{self.node.topic_prefix}/cmd_vel")
         ap_title.setFont(QFont("Arial", 10, QFont.Bold))
         ap_title.setStyleSheet("QLabel { color: #1976D2; }")
         vel_layout.addWidget(ap_title)
 
         # Current velocity display
         self.current_ap_vel_label = QLabel(
-            "Current: Linear(0.0,0.0,0.0)m/s " "Angular(0.0,0.0,0.0)rad/sec"
+            "Linear(0.0,0.0,0.0)m/s " "Angular(0.0,0.0,0.0)rad/sec " "Latency: N/A ms"
         )
         self.current_ap_vel_label.setFont(QFont("Courier", 9))
         vel_label_style = (
@@ -650,9 +650,9 @@ class ArduPilotGUI(QMainWindow):
 
             # Update main display only
             display_text = (
-                f"Current: Linear({vel['x']:.2f},{vel['y']:.2f},"
+                f"Linear({vel['x']:.2f},{vel['y']:.2f},"
                 f"{vel['z']:.2f})m/s Angular({vel['roll']:.2f},"
-                f"{vel['pitch']:.2f},{vel['yaw']:.2f})rad/sec"
+                f"{vel['pitch']:.2f},{vel['yaw']:.2f})rad/sec Latency: {vel['latency']*1000:.0f}ms"
             )
             self.current_ap_vel_label.setText(display_text)
 
@@ -705,7 +705,10 @@ class ArduPilotGUI(QMainWindow):
         data_is_fresh = self.node.is_data_fresh()
 
         if data_received and data_is_fresh:
-            self.connection_label.setText("DDS Status: Connected\nReceiving Data")
+            latency_ms = self.node.get_latency() * 1000
+            self.connection_label.setText(
+                f"DDS Status: Connected\nReceiving Data\nLatency: {latency_ms:.0f}ms"
+            )
             connected_style = (
                 "QLabel { background-color: #ccffcc; "
                 "padding: 10px; border: 2px solid #4CAF50; "
@@ -713,13 +716,18 @@ class ArduPilotGUI(QMainWindow):
             )
             self.connection_label.setStyleSheet(connected_style)
         else:
-            self.connection_label.setText("DDS Status: Connected\nNo Data")
+            self.connection_label.setText("DDS Status: Connected\nNo Data\nLatency N/A")
             no_data_style = (
                 "QLabel { background-color: #f0f0f0; "
                 "padding: 10px; border: 2px solid #ccc; "
                 "margin: 5px; min-height: 60px; }"
             )
             self.connection_label.setStyleSheet(no_data_style)
+
+        # Update cmd_vel status timeout display
+        if not self.node.is_cmd_vel_fresh():
+            display_text = "Linear(0,0,0)m/s Angular(0,0,0)rad/sec Latency: N/A ms"
+            self.current_ap_vel_label.setText(display_text)
 
     def log_message(self, message):
         """Thread-safe log message method using Qt signals."""
