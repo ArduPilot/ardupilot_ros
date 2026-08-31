@@ -19,6 +19,9 @@ def generate_launch_description():
         actions=[
             # TODO: enable when navigation2 supports twist stamped
             # SetRemap(src="/cmd_vel", dst="/ap/cmd_vel"),
+            SetRemap(src="/tf", dst="/ap/tf"),
+            SetRemap(src="/tf_static", dst="/ap/tf_static"),
+            SetRemap(src="/odom", dst="/odometry"),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     str(
@@ -83,6 +86,11 @@ def generate_launch_description():
                     "navigation.rviz",
                 )
             ),
+        ],
+        remappings=[
+            ("/tf", "/ap/tf"),
+            ("/tf_static", "/ap/tf_static"),
+            ("/odom", "/odometry"),
         ],
         condition=IfCondition(LaunchConfiguration("rviz")),
     )

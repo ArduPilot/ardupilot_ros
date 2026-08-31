@@ -13,13 +13,16 @@ Please follow the instructions in the [ardupilot_ros README](../README.md) for o
 ### 1. Cartographer running with LiDAR on copter
 
 This simulation has an Iris copter equipped with a 360 degrees 2D LiDAR in a maze world.
-To launch rviz and gazebo, run:
+To launch gazebo, run:
 
 ```bash
 cd ~/ros2_ws
 source install/setup.bash
-ros2 launch ardupilot_gz_bringup iris_maze.launch.py
+ros2 launch ardupilot_gz_bringup iris_maze.launch.py use_gz_tf:=false rviz:=false
 ```
+
+Notice that we have disabled gazebo as a source of odometry. This is a crucial step for this example, as our odometry source must be cartographer instead. Rviz is also disabled as the visualization will be handled in the next command.
+
 In another terminal, with the world and copter in place, launch cartographer to generate SLAM:
 
 ```bash
@@ -70,7 +73,7 @@ Launch the simulation:
 ```bash
 cd ~/ros2_ws
 source install/setup.sh
-ros2 launch ardupilot_gz_bringup iris_maze.launch.py rviz:=false
+ros2 launch ardupilot_gz_bringup iris_maze.launch.py use_gz_tf:=false rviz:=false
 ```
 Launch cartographer:
 

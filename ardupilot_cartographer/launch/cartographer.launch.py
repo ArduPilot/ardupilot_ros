@@ -32,6 +32,8 @@ def generate_launch_description():
         remappings=[
             ("/imu", "/imu"),
             ("/odom", "/odometry"),
+            ("/tf", "/ap/tf"),
+            ("/tf_static", "/ap/tf_static"),
         ],
     )
 
@@ -74,6 +76,10 @@ def generate_launch_description():
             ),
         ],
         condition=IfCondition(LaunchConfiguration("rviz")),
+        remappings=[
+            ("/tf", "/ap/tf"),
+            ("/tf_static", "/ap/tf_static"),
+        ],
     )
 
     return LaunchDescription(
