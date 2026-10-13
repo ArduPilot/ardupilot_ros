@@ -102,6 +102,32 @@ takeoff 2.5
 
 You may now navigate while mapping using the `Nav2 Goal` tool in RVIZ!
 
+### 4. Multi-vehicle Cartographer
+
+When running multiple vehicles with `ardupilot_gz` (for example via
+`multiagent.launch.py`), each vehicle publishes its sensor data and TF tree
+under its own namespace. Launch Cartographer with the matching `namespace`
+argument so it subscribes to the correct vehicle's topics.
+
+Launch the multi-vehicle simulation:
+
+```bash
+cd ~/ros2_ws
+source install/setup.sh
+ros2 launch ardupilot_gz_bringup multiagent.launch.py rviz:=false gui:=false
+```
+
+In another terminal, launch Cartographer for a specific vehicle (e.g. `drone2`):
+
+```bash
+cd ~/ros2_ws
+source install/setup.sh
+ros2 launch ardupilot_cartographer cartographer.launch.py namespace:=drone2 rviz:=false
+```
+
+The `namespace` argument defaults to an empty string, which preserves the
+original single-vehicle behavior.
+
 ## Contribution Guideline
 
 * Ensure the [pre-commit](https://github.com/pre-commit/pre-commit) hooks pass locally before creating your pull request by installing the hooks before committing.
